@@ -31,9 +31,10 @@ exec rm -f $TARGET_DIR/*
 
 ## Change file names and paths below to reflect your CL area.  DO NOT include AWS RTL files.
 file copy -force $CL_DIR/design/vsi_cl_defines.vh             $TARGET_DIR
-file copy -force $CL_DIR/design/cl_id_defines.vh                      $TARGET_DIR
+file copy -force $CL_DIR/design/cl_id_defines.vh              $TARGET_DIR
+file copy -force $CL_DIR/design/vsi_cl_pkg.sv		      $TARGET_DIR
 file copy -force $CL_DIR/design/vsi_cl.sv                     $TARGET_DIR 
-file copy -force $CL_DIR/../common/design/cl_common_defines.vh        $TARGET_DIR 
+file copy -force $CL_DIR/../examples/common/design/cl_common_defines.vh        $TARGET_DIR 
 #file copy -force $UNUSED_TEMPLATES_DIR/unused_apppf_irq_template.inc  $TARGET_DIR
 file copy -force $UNUSED_TEMPLATES_DIR/unused_aurora_template.inc     $TARGET_DIR
 file copy -force $UNUSED_TEMPLATES_DIR/unused_cl_sda_template.inc     $TARGET_DIR
