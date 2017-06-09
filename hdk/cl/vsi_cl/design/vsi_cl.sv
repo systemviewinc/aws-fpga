@@ -38,13 +38,13 @@ module vsi_cl
    //`include "unused_apppf_irq_template.inc"
    //`include "unused_dma_pcis_template.inc"
    //`include "unused_ddr_a_b_d_template.inc"
-   //`include "unused_ddr_c_template.inc"
 
 `include "unused_flr_template.inc"
 `include "unused_cl_sda_template.inc"
 `include "unused_hmc_template.inc"
 `include "unused_aurora_template.inc"
 `include "unused_sh_bar1_template.inc"
+`include "unused_ddr_c_template.inc"
    
    // Defining local parameters that will instantiate the
    // 3 DRAM controllers inside the CL
@@ -78,8 +78,8 @@ module vsi_cl
    //-------------------------------------------------
    // ID Values (cl_hello_world_defines.vh)
    //-------------------------------------------------
-   assign cl_sh_id0[31:0] = `CL_SH_ID0;
-   assign cl_sh_id1[31:0] = `CL_SH_ID1;
+//   assign cl_sh_id0[31:0] = `CL_SH_ID0;
+//   assign cl_sh_id1[31:0] = `CL_SH_ID1;
    
    //-------------------------------------------------
    // Reset Synchronization
@@ -547,103 +547,103 @@ module vsi_cl
             .DDR_D_PRESENT(DDR_D_PRESENT)
 	    ) SH_DDR
      (
-      .clk(clk_main_a0),
-      .rst_n(sh_ddr_sync_rst_n),
+      .clk		(clk_main_a0),
+      .rst_n		(sh_ddr_sync_rst_n),
       
-      .stat_clk(clk_main_a0),
-      .stat_rst_n(sh_ddr_sync_rst_n),
+      .stat_clk		(clk_main_a0),
+      .stat_rst_n	(sh_ddr_sync_rst_n),
       
       
       .CLK_300M_DIMM0_DP(CLK_300M_DIMM0_DP),
       .CLK_300M_DIMM0_DN(CLK_300M_DIMM0_DN),
-      .M_A_ACT_N(M_A_ACT_N),
-      .M_A_MA(M_A_MA),
-      .M_A_BA(M_A_BA),
-      .M_A_BG(M_A_BG),
-      .M_A_CKE(M_A_CKE),
-      .M_A_ODT(M_A_ODT),
-      .M_A_CS_N(M_A_CS_N),
-      .M_A_CLK_DN(M_A_CLK_DN),
-      .M_A_CLK_DP(M_A_CLK_DP),
-      .M_A_PAR(M_A_PAR),
-      .M_A_DQ(M_A_DQ),
-      .M_A_ECC(M_A_ECC),
-      .M_A_DQS_DP(M_A_DQS_DP),
-      .M_A_DQS_DN(M_A_DQS_DN),
-      .cl_RST_DIMM_A_N(cl_RST_DIMM_A_N),
+      .M_A_ACT_N	(M_A_ACT_N),
+      .M_A_MA		(M_A_MA),
+      .M_A_BA		(M_A_BA),
+      .M_A_BG		(M_A_BG),
+      .M_A_CKE		(M_A_CKE),
+      .M_A_ODT		(M_A_ODT),
+      .M_A_CS_N		(M_A_CS_N),
+      .M_A_CLK_DN	(M_A_CLK_DN),
+      .M_A_CLK_DP	(M_A_CLK_DP),
+      .M_A_PAR		(M_A_PAR),
+      .M_A_DQ		(M_A_DQ),
+      .M_A_ECC		(M_A_ECC),
+      .M_A_DQS_DP	(M_A_DQS_DP),
+      .M_A_DQS_DN	(M_A_DQS_DN),
+      .cl_RST_DIMM_A_N	(cl_RST_DIMM_A_N),
       
       
       .CLK_300M_DIMM1_DP(CLK_300M_DIMM1_DP),
       .CLK_300M_DIMM1_DN(CLK_300M_DIMM1_DN),
-      .M_B_ACT_N(M_B_ACT_N),
-      .M_B_MA(M_B_MA),
-      .M_B_BA(M_B_BA),
-      .M_B_BG(M_B_BG),
-      .M_B_CKE(M_B_CKE),
-      .M_B_ODT(M_B_ODT),
-      .M_B_CS_N(M_B_CS_N),
-      .M_B_CLK_DN(M_B_CLK_DN),
-      .M_B_CLK_DP(M_B_CLK_DP),
-      .M_B_PAR(M_B_PAR),
-      .M_B_DQ(M_B_DQ),
-      .M_B_ECC(M_B_ECC),
-      .M_B_DQS_DP(M_B_DQS_DP),
-      .M_B_DQS_DN(M_B_DQS_DN),
-      .cl_RST_DIMM_B_N(cl_RST_DIMM_B_N),
+      .M_B_ACT_N	(M_B_ACT_N),
+      .M_B_MA		(M_B_MA),
+      .M_B_BA		(M_B_BA),
+      .M_B_BG		(M_B_BG),
+      .M_B_CKE		(M_B_CKE),
+      .M_B_ODT		(M_B_ODT),
+      .M_B_CS_N		(M_B_CS_N),
+      .M_B_CLK_DN	(M_B_CLK_DN),
+      .M_B_CLK_DP	(M_B_CLK_DP),
+      .M_B_PAR		(M_B_PAR),
+      .M_B_DQ		(M_B_DQ),
+      .M_B_ECC		(M_B_ECC),
+      .M_B_DQS_DP	(M_B_DQS_DP),
+      .M_B_DQS_DN	(M_B_DQS_DN),
+      .cl_RST_DIMM_B_N	(cl_RST_DIMM_B_N),
       
       .CLK_300M_DIMM3_DP(CLK_300M_DIMM3_DP),
       .CLK_300M_DIMM3_DN(CLK_300M_DIMM3_DN),
-      .M_D_ACT_N(M_D_ACT_N),
-      .M_D_MA(M_D_MA),
-      .M_D_BA(M_D_BA),
-      .M_D_BG(M_D_BG),
-      .M_D_CKE(M_D_CKE),
-      .M_D_ODT(M_D_ODT),
-      .M_D_CS_N(M_D_CS_N),
-      .M_D_CLK_DN(M_D_CLK_DN),
-      .M_D_CLK_DP(M_D_CLK_DP),
-      .M_D_PAR(M_D_PAR),
-      .M_D_DQ(M_D_DQ),
-      .M_D_ECC(M_D_ECC),
-      .M_D_DQS_DP(M_D_DQS_DP),
-      .M_D_DQS_DN(M_D_DQS_DN),
-      .cl_RST_DIMM_D_N(cl_RST_DIMM_D_N),
+      .M_D_ACT_N	(M_D_ACT_N),
+      .M_D_MA		(M_D_MA),
+      .M_D_BA		(M_D_BA),
+      .M_D_BG		(M_D_BG),
+      .M_D_CKE		(M_D_CKE),
+      .M_D_ODT		(M_D_ODT),
+      .M_D_CS_N		(M_D_CS_N),
+      .M_D_CLK_DN	(M_D_CLK_DN),
+      .M_D_CLK_DP	(M_D_CLK_DP),
+      .M_D_PAR		(M_D_PAR),
+      .M_D_DQ		(M_D_DQ),
+      .M_D_ECC		(M_D_ECC),
+      .M_D_DQS_DP	(M_D_DQS_DP),
+      .M_D_DQS_DN	(M_D_DQS_DN),
+      .cl_RST_DIMM_D_N	(cl_RST_DIMM_D_N),
       
       //------------------------------------------------------
       // DDR-4 Interface from CL (AXI-4)
       //------------------------------------------------------
-      .cl_sh_ddr_awid(cl_sh_ddr_awid_2d),
-      .cl_sh_ddr_awaddr(cl_sh_ddr_awaddr_2d),
-      .cl_sh_ddr_awlen(cl_sh_ddr_awlen_2d),
-      .cl_sh_ddr_awsize(cl_sh_ddr_awsize_2d),
+      .cl_sh_ddr_awid	(cl_sh_ddr_awid_2d),
+      .cl_sh_ddr_awaddr	(cl_sh_ddr_awaddr_2d),
+      .cl_sh_ddr_awlen	(cl_sh_ddr_awlen_2d),
+      .cl_sh_ddr_awsize	(cl_sh_ddr_awsize_2d),
       .cl_sh_ddr_awvalid(cl_sh_ddr_awvalid_2d),
       .sh_cl_ddr_awready(sh_cl_ddr_awready_2d),
       
-      .cl_sh_ddr_wid(cl_sh_ddr_wid_2d),
-      .cl_sh_ddr_wdata(cl_sh_ddr_wdata_2d),
-      .cl_sh_ddr_wstrb(cl_sh_ddr_wstrb_2d),
-      .cl_sh_ddr_wlast(cl_sh_ddr_wlast_2d),
-      .cl_sh_ddr_wvalid(cl_sh_ddr_wvalid_2d),
-      .sh_cl_ddr_wready(sh_cl_ddr_wready_2d),
+      .cl_sh_ddr_wid	(cl_sh_ddr_wid_2d),
+      .cl_sh_ddr_wdata	(cl_sh_ddr_wdata_2d),
+      .cl_sh_ddr_wstrb	(cl_sh_ddr_wstrb_2d),
+      .cl_sh_ddr_wlast	(cl_sh_ddr_wlast_2d),
+      .cl_sh_ddr_wvalid	(cl_sh_ddr_wvalid_2d),
+      .sh_cl_ddr_wready	(sh_cl_ddr_wready_2d),
       
-      .sh_cl_ddr_bid(sh_cl_ddr_bid_2d),
-      .sh_cl_ddr_bresp(sh_cl_ddr_bresp_2d),
-      .sh_cl_ddr_bvalid(sh_cl_ddr_bvalid_2d),
-      .cl_sh_ddr_bready(cl_sh_ddr_bready_2d),
+      .sh_cl_ddr_bid	(sh_cl_ddr_bid_2d),
+      .sh_cl_ddr_bresp	(sh_cl_ddr_bresp_2d),
+      .sh_cl_ddr_bvalid	(sh_cl_ddr_bvalid_2d),
+      .cl_sh_ddr_bready	(cl_sh_ddr_bready_2d),
       
-      .cl_sh_ddr_arid(cl_sh_ddr_arid_2d),
-      .cl_sh_ddr_araddr(cl_sh_ddr_araddr_2d),
-      .cl_sh_ddr_arlen(cl_sh_ddr_arlen_2d),
-      .cl_sh_ddr_arsize(cl_sh_ddr_arsize_2d),
+      .cl_sh_ddr_arid	(cl_sh_ddr_arid_2d),
+      .cl_sh_ddr_araddr	(cl_sh_ddr_araddr_2d),
+      .cl_sh_ddr_arlen	(cl_sh_ddr_arlen_2d),
+      .cl_sh_ddr_arsize	(cl_sh_ddr_arsize_2d),
       .cl_sh_ddr_arvalid(cl_sh_ddr_arvalid_2d),
       .sh_cl_ddr_arready(sh_cl_ddr_arready_2d),
       
-      .sh_cl_ddr_rid(sh_cl_ddr_rid_2d),
-      .sh_cl_ddr_rdata(sh_cl_ddr_rdata_2d),
-      .sh_cl_ddr_rresp(sh_cl_ddr_rresp_2d),
-      .sh_cl_ddr_rlast(sh_cl_ddr_rlast_2d),
-      .sh_cl_ddr_rvalid(sh_cl_ddr_rvalid_2d),
-      .cl_sh_ddr_rready(cl_sh_ddr_rready_2d),
+      .sh_cl_ddr_rid	(sh_cl_ddr_rid_2d),
+      .sh_cl_ddr_rdata	(sh_cl_ddr_rdata_2d),
+      .sh_cl_ddr_rresp	(sh_cl_ddr_rresp_2d),
+      .sh_cl_ddr_rlast	(sh_cl_ddr_rlast_2d),
+      .sh_cl_ddr_rvalid	(sh_cl_ddr_rvalid_2d),
+      .cl_sh_ddr_rready	(cl_sh_ddr_rready_2d),
       
       .sh_cl_ddr_is_ready(lcl_sh_cl_ddr_is_ready),
       
@@ -680,8 +680,8 @@ module vsi_cl
 `endif  
    
    
-   assign cl_sh_status0[31:0] =  32'h0000_0FF0;
-   assign cl_sh_status1[31:0] = `CL_VERSION;
+   //assign cl_sh_status0[31:0] =  32'h0000_0FF0;
+   //assign cl_sh_status1[31:0] = `CL_VERSION;
    
    //-----------------------------------------------
    // Debug bridge, used if need chipscope
@@ -701,12 +701,12 @@ module vsi_cl
    // Integrated Logic Analyzers (ILA)
    ila_0 CL_ILA_0 (
                    .clk    (clk_main_a0),
-                   .probe0 (sh_ocl_awvalid_q),
+                   .probe0 (lcl_sh_cl_ddr_is_ready[0]),
                    .probe1 (sh_ocl_awaddr_q ),
-                   .probe2 (ocl_sh_awready_q),
-                   .probe3 (sh_ocl_arvalid_q),
-                   .probe4 (sh_ocl_araddr_q ),
-                   .probe5 (ocl_sh_arready_q)
+                   .probe2 (lcl_sh_cl_ddr_is_ready[1]),
+                   .probe3 (lcl_sh_cl_ddr_is_ready[2]),
+                   .probe4 (sh_ocl_araddr_q),
+                   .probe5 (lcl_cl_sh_ddra.awready)
                    );
    
    ila_0 CL_ILA_1 (
