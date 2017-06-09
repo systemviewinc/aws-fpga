@@ -4,6 +4,9 @@ LOGS_DIR=logs
 DCP_DIR=dcp
 LOCAL_CL_FILE=$2
 USER_ID=$(aws iam get-user | python -c "import sys, json, re; j = json.load(sys.stdin)['User']['Arn']; print re.search('.*::(\d*)', j).group(1)")
+AFI_NAME=$3
+
+if [ -z $AFI_NAME ]; then read -rep $'Enter AFI Name\n' AFI_NAME; fi
 
 enclose_in_box() {
 	pre=; post=;
@@ -45,6 +48,19 @@ touch /tmp/LOGS_FILES_GO_HERE.txt                     # Create a temp file
 aws s3 cp /tmp/LOGS_FILES_GO_HERE.txt s3://${BUCKET_NAME}/${LOGS_DIR}/  #Which creates the folder on S3
 if [ $? -ne 0 ];then exit $ret; fi
 
-# Verify that the bucket policy grants the required permissions
+enclose_in_box "Verify that the bucket policy grants the required permissions"
 
 ./check_s3_bucket_policy.py --dcp-bucket ${BUCKET_NAME} --dcp-key ${DCP_DIR}/${CL_FILE} --logs-bucket ${BUCKET_NAME} --logs-key ${LOGS_DIR}
+if [ $? -ne 0 ];then exit $ret; fi
+
+enclose_in_box "running check_create_fpga_image"
+
+read -n1 -rep $'Do you want to run check_create_fpga_image now?\n\tPress Y to continue or any other key to abort [y/N]\n' key
+
+CHECK_CREATE="./check_create_fpga_image.py --afi-name ${AFI_NAME} --afi-description \"${AFI_NAME} description\" --dcp-bucket ${BUCKET_NAME} --dcp-key ${CL_FILE} --logs-bucket ${BUCKET_NAME} --logs-key ${LOGS_DIR}"
+if [ "$key" = 'Y' ] || [ "$key" = "y" ]; then
+	echo "running \"$CHECK_CREATE\""
+	eval $CHECK_CREATE
+else
+	echo "run the following command when you are ready: \"$CHECK_CREATE\""
+fi
