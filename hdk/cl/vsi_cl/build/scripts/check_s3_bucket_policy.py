@@ -1,0 +1,1 @@
+../../../../common/scripts/check_s3_bucket_policy.py
