@@ -3,6 +3,7 @@ BUCKET_NAME=$1
 LOGS_DIR=logs
 DCP_DIR=dcp
 LOCAL_CL_FILE=$2
+USER_ID=$(aws iam get-user | python -c "import sys, json; print json.load(sys.stdin)['User']['UserId']")
 
 enclose_in_box() {
 	pre=; post=;
@@ -16,7 +17,7 @@ enclose_in_box() {
 if [ -z $1 ] || [ -z $2 ]; then enclose_in_box "Usage: $0 <bucket name (should be unique)> <CL tarball>"; exit; fi
 
 CL_FILE=$(basename $LOCAL_CL_FILE)
-PERMISSIONS="{\"Version\": \"2012-10-17\",\"Statement\": [{\"Sid\": \"Bucket level permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:ListBucket\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}\"},{\"Sid\": \"Object read permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:GetObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${DCP_DIR}/*\"},{\"Sid\": \"Logs folder write permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:PutObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${LOGS_DIR}/*\"}]}"
+PERMISSIONS="{\"Version\": \"2012-10-17\",\"Statement\": [{\"Sid\": \"Bucket level permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:ListBucket\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}\"},{\"Sid\": \"Object read permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:GetObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${DCP_DIR}/*\"},{\"Sid\": \"Logs folder write permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:PutObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${LOGS_DIR}/*\"}, { \"Sid\": \"Bucket level permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:ListBucket\" ], \"Resource\": \"arn:aws:s3:::mybbbucket\" }, { \"Sid\": \"Object write permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:PutObject\" ], \"Resource\": \"arn:aws:s3:::mybbbucket/dcp/abc.Developer_CL.tar\" }, { \"Sid\": \"Object read permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:GetObject\" ], \"Resource\": \"arn:aws:s3:::mybbbucket/logs/*\" }]}"
 
 POLICY_FILE="$(uuidgen)_policy.json"
 
