@@ -15,6 +15,7 @@
 
 package require tar
 
+set top top_sp
 set TOP vsi_cl
 
 #################################################
@@ -33,6 +34,40 @@ set clock_recipe_b      [lindex $argv  9]
 set clock_recipe_c      [lindex $argv 10]
 set run_aws_emulation   [lindex $argv 11]
 set notify_via_sns      [lindex $argv 12]
+
+##################################################
+### Implementation step options 
+##################################################
+#Set psip to 1 to enable Physical Synthesis in Placer (2017.1+ only)
+set psip 1
+
+set opt 1
+set opt_options    "-verbose"
+set opt_directive  "ExploreWithRemap"
+set opt_preHookTcl ""
+
+set place 1
+set place_options    ""
+set place_directive  "Explore"
+#Prohbit sites to avoid congestion if utilization is low enough
+
+set place_preHookTcl ""
+
+set phys_opt 1
+set phys_options    ""
+set phys_directive  "Explore"
+set phys_preHookTcl ""
+
+set route 1
+set route_options    ""
+set route_directive  "Explore"
+set route_preHookTcl ""
+
+set route_phys_opt 1
+set post_phys_options    ""
+set post_phys_directive  "Explore"
+set post_phys_preHookTcl ""
+
 
 #################################################
 ## Generate CL_routed.dcp (Done by User)
@@ -129,6 +164,7 @@ if {[string compare $notify_via_sns "1"] == 0} {
 }
 
 source encrypt.tcl
+source $HDK_SHELL_DIR/build/scripts/step.tcl -notrace
 
 ##################################################
 ### Tcl Procs and Params 
@@ -152,6 +188,27 @@ if {[string match "2017.1*" [version -short]]} {
    ####Turn off debug flow DRCs due to false error caused by ECO changes (tck_clk.tcl)
    set_param chipscope.enablePRFlowDRC 0
 }
+##################################################
+### Source and Output Directories 
+##################################################
+set synthDir  "../synthesis_user_sda"
+set implDir   "../implement_user_sda"
+set rptDir    "../reports_user_sda"
+
+##################################################
+### Create output Directories 
+##################################################
+if {![file exists $synthDir]} {
+   file mkdir $synthDir
+}
+
+if {![file exists $implDir]} {
+   file mkdir $implDir
+}
+
+if {![file exists $rptDir]} {
+   file mkdir $rptDir
+}
 
 #This sets the Device Type
 source $HDK_SHELL_DIR/build/scripts/device_type.tcl
@@ -159,6 +216,8 @@ source $HDK_SHELL_DIR/build/scripts/device_type.tcl
 create_project -in_memory -part [DEVICE_TYPE] -force
 
 set_param chipscope.enablePRFlow true
+#Param needed to avoid clock name collisions
+set_param sta.enableAutoGenClkNamePersistence 0
 
 ########################################
 ## Generate clocks based on Recipe 
@@ -182,7 +241,7 @@ puts "AWS FPGA: ([clock format [clock seconds] -format %T]) Reading developer's 
 # Reading the .sv and .v files, as proper designs would not require
 # reading .v, .vh, nor .inc files
 
-read_verilog -sv  [glob $ENC_SRC_DIR/*.?v] 
+read_verilog -sv [ glob $ENC_SRC_DIR/*.{v,sv} ]
 
 #---- End of section replaced by User ----
 
@@ -238,39 +297,44 @@ puts "AWS FPGA: Reading AWS constraints";
 #  cl_synth_user.xdc  - Developer synthesis constraints.
 read_xdc [ list \
    $CL_DIR/build/constraints/cl_clocks_aws.xdc \
+   $HDK_SHELL_DIR/build/constraints/cl_synth_aws.xdc \
    $HDK_SHELL_DIR/build/constraints/cl_ddr.xdc \
    $CL_DIR/build/constraints/cl_synth_user.xdc
 ]
 
 #Do not propagate local clock constraints for clocks generated in the SH
-set_property USED_IN {synthesis OUT_OF_CONTEXT} [get_files cl_clocks_aws.xdc]
+#set_property USED_IN {synthesis OUT_OF_CONTEXT} [get_files cl_clocks_aws.xdc]
+set_property USED_IN {synthesis implementation OUT_OF_CONTEXT} [get_files cl_clocks_aws.xdc]
+set_property USED_IN {synthesis implementation} [get_files cl_synth_aws.xdc]
+set_property PROCESSING_ORDER EARLY  [get_files cl_clocks_aws.xdc]
+set_property PROCESSING_ORDER LATE   [get_files cl_synth_aws.xdc]
+
 read_checkpoint -strict -cell aws_fpga $CL_DIR/aws_fpga.dcp
 
 ########################
 # CL Synthesis
 ########################
 puts "AWS FPGA: ([clock format [clock seconds] -format %T]) Start design synthesis.";
-
 switch $strategy {
     "BASIC" {
         puts "BASIC strategy."
-        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context  -keep_equivalent_registers -flatten_hierarchy rebuilt
+        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context  -keep_equivalent_registers -flatten_hierarchy rebuilt > $synthDir/${TOP}_synth.log
     }
     "EXPLORE" {
         puts "EXPLORE strategy."
-        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context  -keep_equivalent_registers -flatten_hierarchy rebuilt
+        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context  -keep_equivalent_registers -flatten_hierarchy rebuilt > $synthDir/${TOP}_synth.log 
     }
     "TIMING" {
         puts "TIMING strategy."
-        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context -no_lc -shreg_min_size 5 -fsm_extraction one_hot -resource_sharing off 
+        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context -no_lc -shreg_min_size 5 -fsm_extraction one_hot -resource_sharing off > $synthDir/${TOP}_synth.log 
     }
     "CONGESTION" {
         puts "CONGESTION strategy."
-        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context -directive AlternateRoutability -no_lc -shreg_min_size 10 -control_set_opt_threshold 16
+        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context -directive AlternateRoutability -no_lc -shreg_min_size 10 -control_set_opt_threshold 16 > $synthDir/${TOP}_synth.log 
     }
     "DEFAULT" {
         puts "DEFAULT strategy."
-        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context  -keep_equivalent_registers
+        synth_design -top $TOP -verilog_define XSDB_SLV_DIS -part [DEVICE_TYPE] -mode out_of_context  -keep_equivalent_registers > $synthDir/${TOP}_synth.log
     }
     default {
         puts "$strategy is NOT a valid strategy."
@@ -287,6 +351,8 @@ puts "AWS FPGA: ([clock format [clock seconds] -format %T]) writing post synth c
 
 write_checkpoint -force $CL_DIR/build/checkpoints/${timestamp}.CL.post_synth.dcp
 close_project
+#Set param back to default value
+set_param sta.enableAutoGenClkNamePersistence 1
 
 ########################
 # CL Optimize
@@ -299,8 +365,11 @@ puts "AWS FPGA: ([clock format [clock seconds] -format %T]) Optimizing design.";
 
 puts "AWS FPGA: Implementation step -Combining Shell and CL design checkpoints";
 
-open_checkpoint $HDK_SHELL_DIR/build/checkpoints/from_aws/SH_CL_BB_routed.dcp
-read_checkpoint -strict -cell CL $CL_DIR/build/checkpoints/${timestamp}.CL.post_synth.dcp
+#open_checkpoint $HDK_SHELL_DIR/build/checkpoints/from_aws/SH_CL_BB_routed.dcp
+#read_checkpoint -strict -cell CL $CL_DIR/build/checkpoints/${timestamp}.CL.post_synth.dcp
+add_files $HDK_SHELL_DIR/build/checkpoints/from_aws/SH_CL_BB_routed.dcp
+add_files $CL_DIR/build/checkpoints/${timestamp}.CL.post_synth.dcp
+set_property SCOPED_TO_CELLS {CL} [get_files $CL_DIR/build/checkpoints/${timestamp}.CL.post_synth.dcp]
 
 #Read the constraints, note *DO NOT* read cl_clocks_aws (clocks originating from AWS shell)
 read_xdc [ list \
@@ -308,6 +377,12 @@ read_xdc [ list \
    $CL_DIR/build/constraints/cl_pnr_user.xdc \
    $HDK_SHELL_DIR/build/constraints/cl_ddr.xdc
 ]
+set_property PROCESSING_ORDER late [get_files cl_pnr_user.xdc]
+
+link_design -top $top -part [DEVICE_TYPE] -reconfig_partitions {SH CL}
+
+puts "Writing post-link_design checkpoint $implDir/$top.post_link.dcp"
+write_checkpoint -force $implDir/$top.post_link_design.dcp > $implDir/checkpoint.log
 
 puts "AWS FPGA: ([clock format [clock seconds] -format %T]) Sourcing aws_clock_properties.tcl to apply properties to clocks. ";
 
@@ -335,7 +410,10 @@ switch $strategy {
     }
     "DEFAULT" {
         puts "DEFAULT strategy."
-        opt_design -directive Explore
+        impl_step opt_design $top $opt_options $opt_directive $opt_preHookTcl
+        if {$psip} {
+           impl_step opt_design $top "-merge_equivalent_drivers -sweep"
+        }
     }
     default {
         puts "$strategy is NOT a valid strategy."
@@ -361,6 +439,11 @@ foreach uramSite $uramSites {
 ########################
 puts "AWS FPGA: Place design stage";
 
+# Constraints for TCK<->Main Clock
+set_clock_groups -name tck_clk_main_a0 -asynchronous -group [get_clocks -of_objects [get_pins static_sh/SH_DEBUG_BRIDGE/inst/bsip/inst/USE_SOFTBSCAN.U_TAP_TCKBUFG/O]] -group [get_clocks -of_objects [get_pins SH/kernel_clks_i/clkwiz_sys_clk/inst/CLK_CORE_DRP_I/clk_inst/mmcme3_adv_inst/CLKOUT0]]
+set_clock_groups -name tck_drck -asynchronous -group [get_clocks -of_objects [get_pins static_sh/SH_DEBUG_BRIDGE/inst/bsip/inst/USE_SOFTBSCAN.U_TAP_TCKBUFG/O]] -group [get_clocks drck]
+set_clock_groups -name tck_userclk -asynchronous -group [get_clocks -of_objects [get_pins static_sh/SH_DEBUG_BRIDGE/inst/bsip/inst/USE_SOFTBSCAN.U_TAP_TCKBUFG/O]] -group [get_clocks -of_objects [get_pins static_sh/pcie_inst/inst/gt_top_i/diablo_gt.diablo_gt_phy_wrapper/phy_clk_i/bufg_gt_userclk/O]]
+
 switch $strategy {
     "BASIC" {
         puts "BASIC strategy."
@@ -380,7 +463,10 @@ switch $strategy {
     }
     "DEFAULT" {
         puts "DEFAULT strategy."
-        place_design -directive ExtraNetDelay_high
+        if {$psip} {
+           append place_options " -fanout_opt"
+        }
+        impl_step place_design $top $place_options $place_directive $place_preHookTcl
     }
     default {
         puts "$strategy is NOT a valid strategy."
@@ -415,7 +501,7 @@ switch $strategy {
     }
     "DEFAULT" {
         puts "DEFAULT strategy."
-        phys_opt_design -directive Explore
+        impl_step phys_opt_design $top $phys_options $phys_directive $phys_preHookTcl
     }
     default {
         puts "$strategy is NOT a valid strategy."
@@ -447,7 +533,7 @@ switch $strategy {
     }
     "DEFAULT" {
         puts "DEFAULT strategy."
-        route_design -directive Explore
+        impl_step route_design $top $route_options $route_directive $route_preHookTcl
     }
     default {
         puts "$strategy is NOT a valid strategy."
@@ -476,7 +562,10 @@ switch $strategy {
     }
     "DEFAULT" {
         puts "DEFAULT strategy."
-        phys_opt_design  -directive Explore
+        set SLACK [get_property SLACK [get_timing_paths]]
+        if {$route_phys_opt && $SLACK > -0.400 && $SLACK < 0} {
+           impl_step route_phys_opt_design $top $post_phys_options $post_phys_directive $post_phys_preHookTcl
+        }
     }
     default {
         puts "$strategy is NOT a valid strategy."
