@@ -187,7 +187,7 @@ module vsi_cl
    // need to chop the upper bits
    assign cl_sh_pcim_araddr = {32'b0,cl_sh_pcim_araddr_out[31:0]}; 
    assign cl_sh_pcim_awaddr = {32'b0,cl_sh_pcim_awaddr_out[31:0]};
-   
+`ifndef VSI_SIM   
    aws_fpga_wrapper 
      aws_fpga (.DDR_A_araddr	(lcl_cl_sh_ddra.araddr),
 	       .DDR_A_arburst	(),
@@ -329,6 +329,7 @@ module vsi_cl
 	       .DMA_PCIS_wstrb		(sh_cl_dma_pcis_wstrb),
 	       .DMA_PCIS_wvalid		(sh_cl_dma_pcis_wvalid),
 	       .irq_o			(irq_o));
+   `endif
    assign cl_sh_apppf_irq_req = {15'b0,irq_o};
    
    ///////////////////////////////////////////////////////////////////////

@@ -30,9 +30,14 @@ logic [15:0] vled_value;
    initial begin
 
       tb.power_up();
-      
+      tb.nsec_delay(500);
       tb.set_virtual_dip_switch(.dip(0));
+      tb.poke_stat(.addr(8'h0c), .ddr_idx(0), .data(32'h0000_0000));
+      tb.poke_stat(.addr(8'h0c), .ddr_idx(1), .data(32'h0000_0000));
+      tb.poke_stat(.addr(8'h0c), .ddr_idx(2), .data(32'h0000_0000));
 
+      // allow memory to initialize
+      tb.nsec_delay(25000);
       vdip_value = tb.get_virtual_dip_switch();
 
       $display ("value of vdip:%0x", vdip_value);
