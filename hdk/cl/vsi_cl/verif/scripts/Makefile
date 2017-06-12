@@ -39,8 +39,8 @@ export XILINX_IP = $(HDK_SHELL_DIR)/design/ip
 export SH_LIB_DIR = $(HDK_SHELL_DIR)/design/lib
 export SH_INF_DIR = $(HDK_SHELL_DIR)/design/interfaces
 
-SV_TEST_LIST = test_hello_world
-C_TEST_LIST  = test_hello_world.c
+SV_TEST_LIST = test_vsi_cl
+C_TEST_LIST  = test_vsi_cl.c
 
 all:	make_sim_dir compile run
 

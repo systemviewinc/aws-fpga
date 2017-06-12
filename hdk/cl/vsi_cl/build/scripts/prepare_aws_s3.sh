@@ -3,7 +3,10 @@ BUCKET_NAME=$1
 LOGS_DIR=logs
 DCP_DIR=dcp
 LOCAL_CL_FILE=$2
-USER_ID=$(aws iam get-user | python -c "import sys, json; print json.load(sys.stdin)['User']['UserId']")
+USER_ID=$(aws iam get-user | python -c "import sys, json, re; j = json.load(sys.stdin)['User']['Arn']; print re.search('.*::(\d*)', j).group(1)")
+AFI_NAME=$3
+
+if [ -z $AFI_NAME ]; then read -rep $'Enter AFI Name\n' AFI_NAME; fi
 
 enclose_in_box() {
 	pre=; post=;
@@ -17,7 +20,7 @@ enclose_in_box() {
 if [ -z $1 ] || [ -z $2 ]; then enclose_in_box "Usage: $0 <bucket name (should be unique)> <CL tarball>"; exit; fi
 
 CL_FILE=$(basename $LOCAL_CL_FILE)
-PERMISSIONS="{\"Version\": \"2012-10-17\",\"Statement\": [{\"Sid\": \"Bucket level permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:ListBucket\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}\"},{\"Sid\": \"Object read permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:GetObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${DCP_DIR}/*\"},{\"Sid\": \"Logs folder write permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:PutObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${LOGS_DIR}/*\"}, { \"Sid\": \"Bucket level permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:ListBucket\" ], \"Resource\": \"arn:aws:s3:::mybbbucket\" }, { \"Sid\": \"Object write permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:PutObject\" ], \"Resource\": \"arn:aws:s3:::mybbbucket/dcp/abc.Developer_CL.tar\" }, { \"Sid\": \"Object read permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:GetObject\" ], \"Resource\": \"arn:aws:s3:::mybbbucket/logs/*\" }]}"
+PERMISSIONS="{\"Version\": \"2012-10-17\",\"Statement\": [{\"Sid\": \"Bucket level permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:ListBucket\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}\"},{\"Sid\": \"Object read permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:GetObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${DCP_DIR}/*\"},{\"Sid\": \"Logs folder write permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:PutObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${LOGS_DIR}/*\"}, { \"Sid\": \"Bucket level permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:ListBucket\" ], \"Resource\": \"arn:aws:s3:::${BUCKET_NAME}\" }, { \"Sid\": \"Object write permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:PutObject\" ], \"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${DCP_DIR}/*\" }, { \"Sid\": \"Object read permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:GetObject\" ], \"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/logs/*\" }]}"
 
 POLICY_FILE="$(uuidgen)_policy.json"
 
@@ -45,6 +48,13 @@ touch /tmp/LOGS_FILES_GO_HERE.txt                     # Create a temp file
 aws s3 cp /tmp/LOGS_FILES_GO_HERE.txt s3://${BUCKET_NAME}/${LOGS_DIR}/  #Which creates the folder on S3
 if [ $? -ne 0 ];then exit $ret; fi
 
-# Verify that the bucket policy grants the required permissions
+enclose_in_box "Verify that the bucket policy grants the required permissions"
 
 ./check_s3_bucket_policy.py --dcp-bucket ${BUCKET_NAME} --dcp-key ${DCP_DIR}/${CL_FILE} --logs-bucket ${BUCKET_NAME} --logs-key ${LOGS_DIR}
+if [ $? -ne 0 ];then exit $ret; fi
+
+enclose_in_box "running check_create_fpga_image"
+
+CHECK_CREATE="./check_create_fpga_image.py --afi-name ${AFI_NAME} --afi-description \"${AFI_NAME} description\" --dcp-bucket ${BUCKET_NAME} --dcp-key ${DCP_DIR}/${CL_FILE} --logs-bucket ${BUCKET_NAME} --logs-key ${LOGS_DIR}"
+echo "running \"$CHECK_CREATE\""
+eval $CHECK_CREATE

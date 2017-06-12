@@ -1,0 +1,1 @@
+../../../../common/scripts/check_create_fpga_image.py
