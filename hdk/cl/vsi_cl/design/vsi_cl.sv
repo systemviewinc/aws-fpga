@@ -686,7 +686,7 @@ module vsi_cl
    assign cl_sh_ddr_bready_2d = {lcl_cl_sh_ddrd.bready, lcl_cl_sh_ddrb.bready, lcl_cl_sh_ddra.bready};
    
    assign cl_sh_ddr_arid_2d 	= '{lcl_cl_sh_ddrd.arid, lcl_cl_sh_ddrb.arid, lcl_cl_sh_ddra.arid};
-   assign cl_sh_ddr_araddr_2d 	= '{lcl_cl_sh_ddrd.araddr & , lcl_cl_sh_ddrb.araddr, lcl_cl_sh_ddra.araddr};
+   assign cl_sh_ddr_araddr_2d 	= '{lcl_cl_sh_ddrd.araddr, lcl_cl_sh_ddrb.araddr, lcl_cl_sh_ddra.araddr};
    assign cl_sh_ddr_arlen_2d 	= '{lcl_cl_sh_ddrd.arlen, lcl_cl_sh_ddrb.arlen, lcl_cl_sh_ddra.arlen};
    assign cl_sh_ddr_arsize_2d 	= '{lcl_cl_sh_ddrd.arsize, lcl_cl_sh_ddrb.arsize, lcl_cl_sh_ddra.arsize};
    assign cl_sh_ddr_arvalid_2d 	= {lcl_cl_sh_ddrd.arvalid, lcl_cl_sh_ddrb.arvalid, lcl_cl_sh_ddra.arvalid};
@@ -926,35 +926,35 @@ module vsi_cl
 		   .probe43(sh_cl_dma_pcis_wlast));
    
    ila_1 CL_ILA_3 (.clk    (clk_main_a0),
-		   .probe0 (lcl_cl_sh_ddrc.wready),
-		   .probe1 (lcl_cl_sh_ddrc.awaddr),
-		   .probe2 (lcl_cl_sh_ddrc.bresp),
-		   .probe3 (lcl_cl_sh_ddrc.bvalid),
-		   .probe4 (lcl_cl_sh_ddrc.bready),
-		   .probe5 (lcl_cl_sh_ddrc.araddr),
-		   .probe6 (lcl_cl_sh_ddrc.rready),
-		   .probe7 (lcl_cl_sh_ddrc.wvalid),
-		   .probe8 (lcl_cl_sh_ddrc.rvalid),
-		   .probe9 (lcl_cl_sh_ddrc.arready),
-		   .probe10(lcl_cl_sh_ddrc.rdata),
-		   .probe11(lcl_cl_sh_ddrc.awvalid),
-		   .probe12(lcl_cl_sh_ddrc.awready),
-		   .probe13(lcl_cl_sh_ddrc.rresp),
-		   .probe14(lcl_cl_sh_ddrc.wdata),
-		   .probe15(lcl_cl_sh_ddrc.wstrb),
-		   .probe16(lcl_cl_sh_ddrc.arvalid),
+		   .probe0 (lcl_cl_sh_ddra.wready),
+		   .probe1 (lcl_cl_sh_ddra.awaddr),
+		   .probe2 (lcl_cl_sh_ddra.bresp),
+		   .probe3 (lcl_cl_sh_ddra.bvalid),
+		   .probe4 (lcl_cl_sh_ddra.bready),
+		   .probe5 (lcl_cl_sh_ddra.araddr),
+		   .probe6 (lcl_cl_sh_ddra.rready),
+		   .probe7 (lcl_cl_sh_ddra.wvalid),
+		   .probe8 (lcl_cl_sh_ddra.rvalid),
+		   .probe9 (lcl_cl_sh_ddra.arready),
+		   .probe10(lcl_cl_sh_ddra.rdata),
+		   .probe11(lcl_cl_sh_ddra.awvalid),
+		   .probe12(lcl_cl_sh_ddra.awready),
+		   .probe13(lcl_cl_sh_ddra.rresp),
+		   .probe14(lcl_cl_sh_ddra.wdata),
+		   .probe15(lcl_cl_sh_ddra.wstrb),
+		   .probe16(lcl_cl_sh_ddra.arvalid),
 		   .probe17('d0),
 		   .probe18('d0),
-		   .probe19(lcl_cl_sh_ddrc.awid),
-		   .probe20(lcl_cl_sh_ddrc.bid),
-		   .probe21(lcl_cl_sh_ddrc.awlen),
+		   .probe19(lcl_cl_sh_ddra.awid),
+		   .probe20(lcl_cl_sh_ddra.bid),
+		   .probe21(lcl_cl_sh_ddra.awlen),
 		   .probe22('d0),
-		   .probe23(lcl_cl_sh_ddrc.awsize),
+		   .probe23(lcl_cl_sh_ddra.awsize),
 		   .probe24('d0),
-		   .probe25(lcl_cl_sh_ddrc.arid),
+		   .probe25(lcl_cl_sh_ddra.arid),
 		   .probe26('d0),
-		   .probe27(lcl_cl_sh_ddrc.arlen),
-		   .probe28(lcl_cl_sh_ddrc.arsize),
+		   .probe27(lcl_cl_sh_ddra.arlen),
+		   .probe28(lcl_cl_sh_ddra.arsize),
 		   .probe29('d0),
 		   .probe30('d0),
 		   .probe31('d0),
@@ -964,12 +964,12 @@ module vsi_cl
 		   .probe35('d0),
 		   .probe36('d0),
 		   .probe37('d0),
-		   .probe38(lcl_cl_sh_ddrc.rid),
+		   .probe38(lcl_cl_sh_ddra.rid),
 		   .probe39('d0),
 		   .probe40('d0),
-		   .probe41(lcl_cl_sh_ddrc.rlast),
+		   .probe41(lcl_cl_sh_ddra.rlast),
 		   .probe42('d0),
-		   .probe43(lcl_cl_sh_ddrc.wlast));
+		   .probe43(lcl_cl_sh_ddra.wlast));
 		   
    // Debug Bridge 
  cl_debug_bridge CL_DEBUG_BRIDGE (
