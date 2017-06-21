@@ -6,8 +6,6 @@ LOCAL_CL_FILE=$2
 USER_ID=$(aws iam get-user | python -c "import sys, json, re; j = json.load(sys.stdin)['User']['Arn']; print re.search('.*::(\d*)', j).group(1)")
 AFI_NAME=$3
 
-if [ -z $AFI_NAME ]; then read -rep $'Enter AFI Name\n' AFI_NAME; fi
-
 enclose_in_box() {
 	pre=; post=;
 	if [ -z "$1" ]; then echo "Incorrect number of params passed"; return; fi
@@ -17,7 +15,7 @@ enclose_in_box() {
 	printf "┌$line┐\n│ ${pre}${1}${post} │\n└${line}┘\n"
 }
 
-if [ -z $1 ] || [ -z $2 ]; then enclose_in_box "Usage: $0 <bucket name (should be unique)> <CL tarball>"; exit; fi
+if [ -z $1 ] || [ -z $2 ] || [ -z $3 ]; then enclose_in_box "Usage: $0 <bucket name (should be unique)> <CL tarball> <AFI_name>"; exit; fi
 
 CL_FILE=$(basename $LOCAL_CL_FILE)
 PERMISSIONS="{\"Version\": \"2012-10-17\",\"Statement\": [{\"Sid\": \"Bucket level permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:ListBucket\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}\"},{\"Sid\": \"Object read permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:GetObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${DCP_DIR}/*\"},{\"Sid\": \"Logs folder write permissions\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"arn:aws:iam::365015490807:root\"},\"Action\": [\"s3:PutObject\"],\"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${LOGS_DIR}/*\"}, { \"Sid\": \"Bucket level permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:ListBucket\" ], \"Resource\": \"arn:aws:s3:::${BUCKET_NAME}\" }, { \"Sid\": \"Object write permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:PutObject\" ], \"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/${DCP_DIR}/*\" }, { \"Sid\": \"Object read permissions\", \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::${USER_ID}:root\" }, \"Action\": [ \"s3:GetObject\" ], \"Resource\": \"arn:aws:s3:::${BUCKET_NAME}/logs/*\" }]}"
