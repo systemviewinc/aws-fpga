@@ -18,7 +18,7 @@ export TEST ?= test_null
 export C_TEST ?= test_null
 
 export CL_ROOT = $(PWD)/../..
-export SIM_WRAPPER_DIR=/home/sandeep/DF_vivado/vsi_aws_ddr_all/vsi_auto_gen/hw/simulator/simulator.ip_user_files/sim_scripts/simulator/
+export SIM_WRAPPER_DIR=/home/sandeep/DF_vivado/project_5/vsi_auto_gen/hw/build/simulator/simulator.ip_user_files/sim_scripts/simulator
 export C_INC_DIR  = $(CL_ROOT)/software/verif_rtl/include
 export C_SRC_DIR  = $(CL_ROOT)/software/verif_rtl/src
 
