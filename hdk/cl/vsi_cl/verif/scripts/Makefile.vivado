@@ -17,8 +17,8 @@
 ##################################################################
 ## Makefile For Vivado compiles and simulations
 ##################################################################
-xvlog_opts=-m64 --relax -L xil_defaultlib=$(SIM_WRAPPER_DIR)xsim/
-xvhdl_opts=-relax
+xvlog_opts=-m64 --relax -initfile /opt/Xilinx/Vivado/2017.1/data/xsim/ip/xsim_ip.ini -L xil_defaultlib=$(SIM_WRAPPER_DIR)/xsim/xsim.dir/xil_defaultlib/
+xvhdl_opts=-initfile /opt/Xilinx/Vivado/2017.1/data/xsim/ip/xsim_ip.ini -relax
 
 compile:
 	mkdir -p $(SIM_DIR)
@@ -26,8 +26,8 @@ compile:
 	cd $(SIM_DIR) && xvlog --sv -m64 --relax -f $(SCRIPTS_DIR)/top.vivado.f
 	cd $(SIM_WRAPPER_DIR)/xsim && xvlog $(xvlog_opts) -prj vlog.prj 2>&1 | tee compile.log
 	cd $(SIM_WRAPPER_DIR)/xsim && xvhdl $(xvhdl_opts) -prj vhdl.prj 2>&1 | tee compile.log
-	cd $(SIM_DIR) && xelab  -m64 --timescale 1ps/1ps --debug typical  --relax --mt 8 -initfile /opt/Xilinx/Vivado/2017.1/data/xsim/ip/xsim_ip.ini -L smartconnect_v1_0 -L axi_protocol_checker_v1_1_13 -L axi_clock_converter_v2_1_11 -L generic_baseblocks_v2_1_0 -L axi_infrastructure_v1_1_0 -L axi_register_slice_v2_1_12  -L generic_baseblocks_v2_1_0 -L axi_infrastructure_v1_1_0 -L axi_register_slice_v2_1_12 -L fifo_generator_v13_1_4 -L axi_data_fifo_v2_1_11 -L axi_crossbar_v2_1_13 -L unisims_ver -L unimacro_ver -L secureip 	-L unisims_ver -L unisim -L unifast_ver -L unifast -L unimacro_ver -L unimacro -L secureip -L axi_register_slice_v2_1_12 -L axi_infrastructure_v1_1_0 -L axi_crossbar_v2_1_13 -L xpm -L axi_clock_converter_v2_1_11 -L fifo_generator_v13_1_4 -L axi_data_fifo_v2_1_11 -L generic_baseblocks_v2_1 -L sc_util_v1_0 -L axi_dwidth_converter_v2_1_12 -L axi_protocol_converter_v2_1_12 -L blk_mem_gen_v8_3_6 --dpi_absolute -sv_root $(VSI_INSTALL)/host/linux.x86_64/data/rpc_simulator --sv_lib simulator_intf -L xil_defaultlib=$(SIM_WRAPPER_DIR)xsim/ -snapshot tb work.tb work.glbl work.$(TEST)
+	cd $(SIM_DIR) && xelab  -m64 --timescale 1ps/1ps --debug typical  --relax --mt 8 -initfile /opt/Xilinx/Vivado/2017.1/data/xsim/ip/xsim_ip.ini -L smartconnect_v1_0 -L axi_protocol_checker_v1_1_13 -L axi_clock_converter_v2_1_11 -L generic_baseblocks_v2_1_0 -L axi_infrastructure_v1_1_0 -L axi_register_slice_v2_1_12  -L generic_baseblocks_v2_1_0 -L axi_infrastructure_v1_1_0 -L axi_register_slice_v2_1_12 -L fifo_generator_v13_1_4 -L axi_data_fifo_v2_1_11 -L axi_crossbar_v2_1_13 -L unisims_ver -L unimacro_ver -L secureip 	-L unisims_ver -L unisim -L unifast_ver -L unifast -L unimacro_ver -L unimacro -L secureip -L axi_register_slice_v2_1_12 -L axi_infrastructure_v1_1_0 -L axi_crossbar_v2_1_13 -L xpm -L axi_clock_converter_v2_1_11 -L fifo_generator_v13_1_4 -L axi_data_fifo_v2_1_11 -L generic_baseblocks_v2_1 -L axis_dwidth_converter_v1_1_11 -L axis_register_slice_v1_1_12 -L axis_infrastructure_v1_1_0 -L axis_subset_converter_v1_1_12 -L sc_util_v1_0 -L axi_dwidth_converter_v2_1_12 -L axi_protocol_converter_v2_1_12 -L axi_protocol_checker_v1_1_13 -L blk_mem_gen_v8_3_6 --dpi_absolute -sv_root $(VSI_INSTALL)/host/linux.x86_64/data/rpc_simulator --sv_lib simulator_intf -L xil_defaultlib=$(SIM_WRAPPER_DIR)/xsim/xsim.dir/xil_defaultlib/ -snapshot tb work.tb work.glbl work.$(TEST)
 
 run:
-	cd $(SIM_DIR) && xsim  -log test.log  tb -gui
+	cd $(SIM_DIR) && xsim  -log test.log  tb
 
