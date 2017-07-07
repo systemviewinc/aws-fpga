@@ -42,11 +42,11 @@ logic [15:0] vled_value;
 
       $display ("value of vdip:%0x", vdip_value);
 
-      tb.kernel_reset();
+      //tb.kernel_reset();
 
-      tb.power_down();
+      //tb.power_down();
       
-      $finish;
+      //$finish;
    end
 
 endmodule // test_hello_world
