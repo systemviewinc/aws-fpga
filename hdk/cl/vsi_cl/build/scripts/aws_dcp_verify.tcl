@@ -1,0 +1,1 @@
+../../../../common/shell_stable/build/scripts/aws_dcp_verify.tcl
